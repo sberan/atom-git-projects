@@ -106,7 +106,9 @@ module.exports =
     JSON.parse(window.localStorage['git-projects.recentPaths'] || '[]')
 
   recentProjects: ->
-    @recentProjectPaths().map((path) -> new Project(path)).filter((prj) -> prj.exists())
+    @recentProjectPaths()
+          .map((path) -> new Project(path))
+          .filter((prj) -> prj.exists() && !prj.isCurrentProject())
     
   saveRecentProject: (project) ->
     recents = @recentProjectPaths();
@@ -142,7 +144,7 @@ module.exports =
         return false if @shouldIgnorePath(_dir)
         if utils.isRepositorySync(_dir) && recentProjects.map((p) -> p.path).indexOf(_dir) < 0
           project = new Project(_dir)
-          unless project.ignored
+          unless project.ignored || project.isCurrentProject()
             @projects.push(project)
           return false
         
