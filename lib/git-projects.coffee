@@ -76,6 +76,7 @@ module.exports =
   #
   # project - The {Project} to open.
   openProject: (project) ->
+    @saveRecentProject(project)
     atom.open options =
       pathsToOpen: [project.path]
       devMode: atom.config.get('git-projects.openInDevMode')
@@ -101,7 +102,17 @@ module.exports =
     return true if ignoredPattern.test(_path)
     return ignoredPaths and ignoredPaths.has(_path)
 
+  recentProjectPaths: ->
+    JSON.parse(window.localStorage['git-projects.recentPaths'] || '[]')
 
+  recentProjects: ->
+    @recentProjectPaths().map((path) -> new Project(path)).filter((prj) -> prj.exists())
+    
+  saveRecentProject: (project) ->
+    recents = @recentProjectPaths();
+    recents.unshift(project.path)
+    window.localStorage['git-projects.recentPaths'] = JSON.stringify(recents);
+  
   # Finds all the git repositories recursively from the given root path(s)
   #
   # root - {String} the path to search from
@@ -109,13 +120,16 @@ module.exports =
     rootPaths = utils.parsePathString(root)
     return cb(@projects) unless rootPaths?
 
+    recentProjects = @recentProjects()
+
     pathsChecked = 0
     rootPaths.forEach (rootPath) =>
 
       sendCallback = =>
         if ++pathsChecked == rootPaths.size
-          cb(utils.sortBy(@projects))
-
+          utils.sortBy(@projects)
+          @projects.unshift.apply(@projects, recentProjects);
+          cb(@projects)
       return sendCallback() if @shouldIgnorePath(rootPath)
 
       rootDepth = rootPath.split(path.sep).length
@@ -123,7 +137,7 @@ module.exports =
 
       fs.traverseTree(rootPath, (->), (_dir) =>
         return false if @shouldIgnorePath(_dir)
-        if utils.isRepositorySync(_dir)
+        if utils.isRepositorySync(_dir) && recentProjects.map((p) -> p.path).indexOf(_dir) < 0
           project = new Project(_dir)
           unless project.ignored
             @projects.push(project)

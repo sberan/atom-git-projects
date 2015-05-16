@@ -11,6 +11,9 @@ class Project
     @title = _path.basename(@path)
     @readConfigFile()
 
+  exists: ->
+    fs.existsSync(@path)
+
   isDirty: ->
     repository = git.open @path
     Object.keys(repository.getStatus()).length != 0
