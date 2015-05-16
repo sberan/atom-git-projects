@@ -47,6 +47,7 @@ class ProjectsListView extends SelectListView
 
   show: ->
     @panel ?= atom.workspace.addModalPanel(item: this)
+    @setItems(@controller.recentProjects())
     @loading.text "Looking for repositories ..."
     @loadingArea.show()
     @panel.show()
