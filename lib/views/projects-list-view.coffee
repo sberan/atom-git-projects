@@ -51,6 +51,7 @@ class ProjectsListView extends SelectListView
     @loading.text "Looking for repositories ..."
     @loadingArea.show()
     @panel.show()
+    @focusFilterEditor()
     @controller.findGitRepos(null, (repos) =>
       @setItems(repos)
       @focusFilterEditor()
