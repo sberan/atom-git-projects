@@ -112,9 +112,11 @@ module.exports =
     
   saveRecentProject: (project) ->
     recents = @recentProjectPaths();
-    if recents.indexOf(project.path) < 0
-      recents.unshift(project.path)
-      window.localStorage['git-projects.recentPaths'] = JSON.stringify(recents);
+    existingLocation = recents.indexOf(project.path)
+    if existingLocation >= 0
+      recents.splice(existingLocation, 1);
+    recents.unshift(project.path)
+    window.localStorage['git-projects.recentPaths'] = JSON.stringify(recents);
   
   # Finds all the git repositories recursively from the given root path(s)
   #
