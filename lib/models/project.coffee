@@ -11,9 +11,15 @@ class Project
     @title = _path.basename(@path)
     @readConfigFile()
 
+  exists: ->
+    fs.existsSync(@path)
+
   isDirty: ->
     repository = git.open @path
     Object.keys(repository.getStatus()).length != 0
+  
+  isCurrentProject: ->
+    atom.project.getPaths().indexOf(@path) >= 0
 
   branch: ->
     repository = git.open @path
