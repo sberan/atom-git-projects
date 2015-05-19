@@ -28,6 +28,10 @@ module.exports =
       type: "string"
       default: "Project name"
       enum: ["Project name", "Latest modification date", "Size"]
+    showRecentsFirst:
+      title: "Show recent projects first"
+      type: "boolean"
+      default: false
     maxDepth:
       title: "Max Folder Depth"
       type: 'integer'
@@ -46,7 +50,6 @@ module.exports =
       description: "Display the branch and a status icon in the list of projects"
       type: "boolean"
       default: true
-
 
   projects: []
   view: null
@@ -106,6 +109,8 @@ module.exports =
     JSON.parse(window.localStorage['git-projects.recentPaths'] || '[]')
 
   recentProjects: ->
+    if !atom.config.get('git-projects.showRecentsFirst')
+      return []
     @recentProjectPaths()
           .map((path) -> new Project(path))
           .filter((prj) -> prj.exists() && !prj.isCurrentProject())
